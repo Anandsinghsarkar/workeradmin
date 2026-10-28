@@ -11,16 +11,12 @@ async function cfFetch(token, endpoint, options = {}) {
       ...(options.headers || {})
     }
   });
-  
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(`Cloudflare Error: ${errorText}`);
+    throw new Error(errorText);
   }
-  
   const contentType = res.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
-    return await res.json();
-  }
+  if (contentType && contentType.includes('application/json')) return await res.json();
   return await res.text();
 }
 
@@ -38,18 +34,27 @@ export async function getWorkers(token, accountId) {
   } catch (err) { return { success: false, message: err.message }; }
 }
 
+export async function createWorker(token, accountId, name) {
+  try {
+    const helloCode = `export default { async fetch(request) { return new Response("Hello from ${name}!"); } };`;
+    const formData = new FormData();
+    formData.append('metadata', new Blob([JSON.stringify({ main_module: 'worker.js', compatibility_date: '2024-01-01' })], { type: 'application/json' }), 'metadata.json');
+    formData.append('worker.js', helloCode, 'worker.js');
+
+    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${name}`, { method: 'PUT', body: formData });
+    
+    // Auto Enable Subdomain for new worker (Cloudflare handles it automatically, we just return success)
+    return { success: true, message: 'Worker Created Successfully!' };
+  } catch (err) { return { success: false, message: err.message }; }
+}
+
 export async function getWorkerCode(token, accountId, workerName) {
   try {
-    const code = await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, {
-      headers: { 'Accept': 'application/javascript' }
-    });
-    // क्लीनअप अगर मल्टीपार्ट बाउंड्री फंसी हो
+    const code = await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, { headers: { 'Accept': 'application/javascript' } });
     let cleanCode = code;
     if (cleanCode.trim().startsWith('--')) {
       const parts = cleanCode.split('name="worker.js"');
-      if (parts.length > 1) {
-        cleanCode = parts[1].split('--')[0].trim();
-      }
+      if (parts.length > 1) cleanCode = parts[1].split('--')[0].trim();
     }
     return { success: true, data: cleanCode };
   } catch (err) { return { success: false, message: err.message }; }
@@ -58,16 +63,10 @@ export async function getWorkerCode(token, accountId, workerName) {
 export async function deployWorker(token, accountId, workerName, code) {
   try {
     const formData = new FormData();
-    formData.append('metadata', new Blob([JSON.stringify({
-      main_module: 'worker.js',
-      compatibility_date: '2024-01-01'
-    })], { type: 'application/json' }), 'metadata.json');
+    formData.append('metadata', new Blob([JSON.stringify({ main_module: 'worker.js', compatibility_date: '2024-01-01' })], { type: 'application/json' }), 'metadata.json');
     formData.append('worker.js', code, 'worker.js');
 
-    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, {
-      method: 'PUT',
-      body: formData
-    });
+    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, { method: 'PUT', body: formData });
     return { success: true, message: 'Deploy हो गया!' };
   } catch (err) { return { success: false, message: err.message }; }
 }
@@ -89,10 +88,8 @@ export async function getSubdomain(token, accountId) {
 export async function updateSubdomain(token, accountId, subdomain) {
   try {
     await cfFetch(token, `/accounts/${accountId}/workers/subdomain`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subdomain })
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subdomain })
     });
-    return { success: true, message: 'Subdomain Update हो गया!' };
+    return { success: true, message: 'Subdomain Updated!' };
   } catch (err) { return { success: false, message: err.message }; }
 }
