@@ -39,21 +39,31 @@ export async function createWorker(token, accountId, name) {
     const helloCode = `export default { async fetch(request) { return new Response("Hello from ${name}!"); } };`;
     const formData = new FormData();
     
-    // 1. Metadata को Blob में बदलें
     formData.append('metadata', new Blob([JSON.stringify({ 
       main_module: 'worker.js', 
       compatibility_date: '2024-01-01' 
     })], { type: 'application/json' }), 'metadata.json');
     
-    // 2. Code (String) को Blob में बदलें (यहाँ पहले एरर आ रहा था)
     formData.append('worker.js', new Blob([helloCode], { type: 'application/javascript+module' }), 'worker.js');
 
+    // 1. Worker बनाएं
     await cfFetch(token, `/accounts/${accountId}/workers/scripts/${name}`, { 
       method: 'PUT', 
       body: formData 
     });
+
+    // 2. डोमेन (workers.dev route) को Auto-Enable करें
+    try {
+      await cfFetch(token, `/accounts/${accountId}/workers/scripts/${name}/subdomain`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: true })
+      });
+    } catch (domainErr) {
+      console.warn('Domain auto-enable failed:', domainErr.message);
+    }
     
-    return { success: true, message: 'Worker Created Successfully!' };
+    return { success: true, message: 'Worker Created & Domain Enabled!' };
   } catch (err) { return { success: false, message: err.message }; }
 }
 
@@ -73,13 +83,11 @@ export async function deployWorker(token, accountId, workerName, code) {
   try {
     const formData = new FormData();
     
-    // 1. Metadata
     formData.append('metadata', new Blob([JSON.stringify({ 
       main_module: 'worker.js', 
       compatibility_date: '2024-01-01' 
     })], { type: 'application/json' }), 'metadata.json');
     
-    // 2. Code (String) को Blob में बदलें
     formData.append('worker.js', new Blob([code], { type: 'application/javascript+module' }), 'worker.js');
 
     await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, { 
