@@ -38,12 +38,21 @@ export async function createWorker(token, accountId, name) {
   try {
     const helloCode = `export default { async fetch(request) { return new Response("Hello from ${name}!"); } };`;
     const formData = new FormData();
-    formData.append('metadata', new Blob([JSON.stringify({ main_module: 'worker.js', compatibility_date: '2024-01-01' })], { type: 'application/json' }), 'metadata.json');
-    formData.append('worker.js', helloCode, 'worker.js');
-
-    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${name}`, { method: 'PUT', body: formData });
     
-    // Auto Enable Subdomain for new worker (Cloudflare handles it automatically, we just return success)
+    // 1. Metadata को Blob में बदलें
+    formData.append('metadata', new Blob([JSON.stringify({ 
+      main_module: 'worker.js', 
+      compatibility_date: '2024-01-01' 
+    })], { type: 'application/json' }), 'metadata.json');
+    
+    // 2. Code (String) को Blob में बदलें (यहाँ पहले एरर आ रहा था)
+    formData.append('worker.js', new Blob([helloCode], { type: 'application/javascript+module' }), 'worker.js');
+
+    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${name}`, { 
+      method: 'PUT', 
+      body: formData 
+    });
+    
     return { success: true, message: 'Worker Created Successfully!' };
   } catch (err) { return { success: false, message: err.message }; }
 }
@@ -63,10 +72,20 @@ export async function getWorkerCode(token, accountId, workerName) {
 export async function deployWorker(token, accountId, workerName, code) {
   try {
     const formData = new FormData();
-    formData.append('metadata', new Blob([JSON.stringify({ main_module: 'worker.js', compatibility_date: '2024-01-01' })], { type: 'application/json' }), 'metadata.json');
-    formData.append('worker.js', code, 'worker.js');
+    
+    // 1. Metadata
+    formData.append('metadata', new Blob([JSON.stringify({ 
+      main_module: 'worker.js', 
+      compatibility_date: '2024-01-01' 
+    })], { type: 'application/json' }), 'metadata.json');
+    
+    // 2. Code (String) को Blob में बदलें
+    formData.append('worker.js', new Blob([code], { type: 'application/javascript+module' }), 'worker.js');
 
-    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, { method: 'PUT', body: formData });
+    await cfFetch(token, `/accounts/${accountId}/workers/scripts/${workerName}`, { 
+      method: 'PUT', 
+      body: formData 
+    });
     return { success: true, message: 'Deploy हो गया!' };
   } catch (err) { return { success: false, message: err.message }; }
 }
