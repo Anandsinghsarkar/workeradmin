@@ -195,13 +195,16 @@ export default function Home() {
         <div className="brand">
           <Cube />
           <div>
-            <h1>CF Manager</h1>
-            <small>Workers Console</small>
+            <h1>APIs Cloner</h1>
+            <small>Professional API & Workers Studio</small>
           </div>
         </div>
-        {isConnected && (
-          <button onClick={disconnect} className="btn logout"><Icon n="logout" size={15} />Disconnect</button>
-        )}
+        <div className="header-right">
+          <span className="owner-badge"><span className="owner-dot" />Owner <b>Anand Singh</b></span>
+          {isConnected && (
+            <button onClick={disconnect} className="btn logout"><Icon n="logout" size={15} />Disconnect</button>
+          )}
+        </div>
       </div>
 
       <div className="stage">
@@ -285,6 +288,11 @@ export default function Home() {
           </>
         )}
       </div>
+      <footer className="app-footer">
+        <span className="footer-brand">APIs Cloner</span>
+        <span>Designed &amp; managed by <b>Anand Singh</b></span>
+        <span className="footer-status"><i /> Professional API Studio</span>
+      </footer>
     </div>
   );
 }
