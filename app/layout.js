@@ -1,9 +1,9 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Worker Admin | Cloudflare Workers Console',
-  description: 'A clean, secure and modern dashboard for managing Cloudflare Workers.',
-  applicationName: 'Worker Admin',
+  title: 'APIs Cloner | Professional API Studio',
+  description: 'APIs Cloner — a professional blue and white API and Cloudflare Workers management studio.',
+  applicationName: 'APIs Cloner',
 };
 
 export const viewport = {
