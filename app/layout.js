@@ -1,12 +1,27 @@
-export const metadata = { title: 'CF Manager' };
+import './globals.css';
+
+export const metadata = {
+  title: 'CF Manager',
+  description: 'Cloudflare Workers manager',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#06080f',
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <meta name="theme-color" content="#f38020" />
-      </head>
-      <body style={{ margin: 0, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: '#f5f5f5', WebkitTapHighlightColor: 'transparent' }}>
+      <body>
+        <div className="bg" aria-hidden="true">
+          <span className="orb o1" />
+          <span className="orb o2" />
+          <span className="orb o3" />
+          <span className="grid" />
+        </div>
         {children}
       </body>
     </html>
