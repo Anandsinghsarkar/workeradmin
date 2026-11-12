@@ -30,10 +30,10 @@ function Icon({ n, size = 18 }) {
   );
 }
 
-function Cube({ big }) {
+function Logo({ big }) {
   return (
-    <div className={`cube-wrap${big ? ' big' : ''}`} aria-hidden="true">
-      <div className="cube"><i /><i /><i /><i /><i /><i /></div>
+    <div className={`logo${big ? ' big' : ''}`} aria-hidden="true">
+      <Icon n="zap" size={big ? 32 : 20} />
     </div>
   );
 }
@@ -193,7 +193,7 @@ export default function Home() {
       {/* Header */}
       <div className="header">
         <div className="brand">
-          <Cube />
+          <Logo />
           <div>
             <h1>CF Manager</h1>
             <small>Workers Console</small>
@@ -204,87 +204,85 @@ export default function Home() {
         )}
       </div>
 
-      <div className="stage">
-        {!isConnected ? (
+      {!isConnected ? (
 
-          /* Login Screen */
+        /* Login Screen */
+        <div className="card">
+          <Logo big />
+          <h3 style={{ justifyContent: 'center' }}>Login</h3>
+          <input className="input" type="password" placeholder="API Token" value={token} onChange={e => setToken(e.target.value)} autoComplete="off" />
+          <input className="input" type="text" placeholder="Account ID" value={accountId} onChange={e => setAccountId(e.target.value)} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+          <button onClick={handleConnect} disabled={loading} className="btn block">
+            <Icon n="lock" size={16} />{loading ? 'Connecting...' : 'Connect & Save'}
+          </button>
+        </div>
+
+      ) : editingWorker ? (
+
+        /* Editor Screen */
+        <div className="card">
+          <div className="editor-head">
+            <h3><span className="ico"><Icon n="edit" size={16} /></span>{editingWorker}</h3>
+            <button onClick={() => setEditingWorker(null)} className="btn sm" style={{ minWidth: 84 }}><Icon n="x" size={14} />Close</button>
+          </div>
+          <textarea
+            className="code"
+            value={code}
+            onChange={e => setCode(e.target.value)}
+            spellCheck={false}
+            autoCapitalize="off"
+            autoCorrect="off"
+            wrap="off"
+          />
+          <button onClick={handleDeploy} className="btn block"><Icon n="rocket" size={16} />Save & Deploy</button>
+        </div>
+
+      ) : (
+
+        /* Dashboard Screen */
+        <>
+          {/* Subdomain Manager */}
           <div className="card">
-            <Cube big />
-            <h3 style={{ justifyContent: 'center' }}>Login</h3>
-            <input className="input" type="password" placeholder="API Token" value={token} onChange={e => setToken(e.target.value)} autoComplete="off" />
-            <input className="input" type="text" placeholder="Account ID" value={accountId} onChange={e => setAccountId(e.target.value)} autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false} />
-            <button onClick={handleConnect} disabled={loading} className="btn block">
-              <Icon n="lock" size={16} />{loading ? 'Connecting...' : 'Connect & Save'}
-            </button>
+            <h3><span className="ico"><Icon n="globe" size={16} /></span>Subdomain</h3>
+            <p className="muted">वर्तमान: <b>{subdomain ? `*.${subdomain}.workers.dev` : 'कोई नहीं'}</b></p>
+            <div className="row">
+              <input className="input" type="text" placeholder="नया Subdomain" value={newSubdomain} onChange={e => setNewSubdomain(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+              <button className="btn" onClick={async () => { await updateSubdomain(token, accountId, newSubdomain); loadData(); setNewSubdomain(''); }}>Save</button>
+            </div>
           </div>
 
-        ) : editingWorker ? (
-
-          /* Editor Screen */
+          {/* Create Worker */}
           <div className="card">
-            <div className="editor-head">
-              <h3><span className="ico"><Icon n="edit" size={16} /></span>{editingWorker}</h3>
-              <button onClick={() => setEditingWorker(null)} className="btn sm" style={{ minWidth: 84 }}><Icon n="x" size={14} />Close</button>
+            <h3><span className="ico"><Icon n="plus" size={16} /></span>New Worker</h3>
+            <div className="row">
+              <input className="input" type="text" placeholder="worker-name" value={newWorkerName} onChange={e => setNewWorkerName(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+              <button className="btn" onClick={handleCreateWorker}>Create</button>
             </div>
-            <textarea
-              className="code"
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              spellCheck={false}
-              autoCapitalize="off"
-              autoCorrect="off"
-              wrap="off"
-            />
-            <button onClick={handleDeploy} className="btn block"><Icon n="rocket" size={16} />Save & Deploy</button>
           </div>
 
-        ) : (
-
-          /* Dashboard Screen */
-          <>
-            {/* Subdomain Manager */}
-            <div className="card">
-              <h3><span className="ico"><Icon n="globe" size={16} /></span>Subdomain</h3>
-              <p className="muted">वर्तमान: <b>{subdomain ? `*.${subdomain}.workers.dev` : 'कोई नहीं'}</b></p>
-              <div className="row">
-                <input className="input" type="text" placeholder="नया Subdomain" value={newSubdomain} onChange={e => setNewSubdomain(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
-                <button className="btn" onClick={async () => { await updateSubdomain(token, accountId, newSubdomain); loadData(); setNewSubdomain(''); }}>Save</button>
-              </div>
-            </div>
-
-            {/* Create Worker */}
-            <div className="card">
-              <h3><span className="ico"><Icon n="plus" size={16} /></span>New Worker</h3>
-              <div className="row">
-                <input className="input" type="text" placeholder="worker-name" value={newWorkerName} onChange={e => setNewWorkerName(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
-                <button className="btn" onClick={handleCreateWorker}>Create</button>
-              </div>
-            </div>
-
-            {/* Workers List */}
-            <div className="card">
-              <h3>
-                <span className="ico"><Icon n="list" size={16} /></span>Your Workers
-                <span className="count">{workers.length}</span>
-              </h3>
-              {workers.length === 0 && <p className="empty">कोई Worker नहीं है</p>}
-              {workers.map(w => (
-                <div key={w.id} className="worker">
-                  <div className="name"><Icon n="zap" size={16} />{w.id}</div>
-                  <a href={`https://${w.id}.${subdomain}.workers.dev`} target="_blank" rel="noreferrer">
-                    <Icon n="link" size={13} />https://{w.id}.{subdomain}.workers.dev
-                  </a>
-                  <div className="actions">
-                    <button onClick={() => handleEdit(w.id)} className="btn sm"><Icon n="edit" size={14} />Edit</button>
-                    <button onClick={() => handleDownload(w.id)} className="btn sm blue"><Icon n="download" size={14} />Download</button>
-                    <button onClick={() => handleDelete(w.id)} className="btn sm red"><Icon n="trash" size={14} />Delete</button>
-                  </div>
+          {/* Workers List */}
+          <div className="card">
+            <h3>
+              <span className="ico"><Icon n="list" size={16} /></span>Your Workers
+              <span className="count">{workers.length}</span>
+            </h3>
+            {workers.length === 0 && <p className="empty">कोई Worker नहीं है</p>}
+            {workers.map(w => (
+              <div key={w.id} className="worker">
+                <div className="name"><Icon n="zap" size={16} />{w.id}</div>
+                <a href={`https://${w.id}.${subdomain}.workers.dev`} target="_blank" rel="noreferrer">
+                  <Icon n="link" size={13} />https://{w.id}.{subdomain}.workers.dev
+                </a>
+                <div className="actions">
+                  <button onClick={() => handleEdit(w.id)} className="btn sm"><Icon n="edit" size={14} />Edit</button>
+                  <button onClick={() => handleDownload(w.id)} className="btn sm"><Icon n="download" size={14} />Download</button>
+                  <button onClick={() => handleDelete(w.id)} className="btn sm red"><Icon n="trash" size={14} />Delete</button>
                 </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

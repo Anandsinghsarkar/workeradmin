@@ -9,7 +9,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#06080f',
+  themeColor: '#eef4ff',
 };
 
 export default function RootLayout({ children }) {
@@ -20,7 +20,6 @@ export default function RootLayout({ children }) {
           <span className="orb o1" />
           <span className="orb o2" />
           <span className="orb o3" />
-          <span className="grid" />
         </div>
         {children}
       </body>
