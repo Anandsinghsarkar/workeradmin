@@ -1,15 +1,16 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'CF Manager',
-  description: 'Cloudflare Workers manager',
+  title: 'Worker Admin | Cloudflare Workers Console',
+  description: 'A clean, secure and modern dashboard for managing Cloudflare Workers.',
+  applicationName: 'Worker Admin',
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#06080f',
+  themeColor: '#070b16',
 };
 
 export default function RootLayout({ children }) {
